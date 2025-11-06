@@ -1,6 +1,5 @@
 #include "PlayerAudio.h"
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
+ؤ
 
 PlayerAudio::PlayerAudio() { formatManager.registerBasicFormats(); }
 PlayerAudio::~PlayerAudio() { releaseResources(); }
@@ -55,6 +54,7 @@ void PlayerAudio::pause() { if (transportSource.isPlaying()) transportSource.sto
 void PlayerAudio::stop() { transportSource.stop(); transportSource.setPosition(0.0); isPaused = false; }
 
 
+//jjjj
 
 void PlayerAudio::restart()
 {
@@ -86,3 +86,4 @@ void PlayerAudio::playFileAt(int index)
     play();
 }
 juce::String PlayerAudio::getFileNameAt(int index) const { return (index >= 0 && index < (int)playlist.size()) ? playlist[index].getFileName() : ""; }
+
