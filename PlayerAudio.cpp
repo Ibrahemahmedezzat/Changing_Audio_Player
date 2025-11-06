@@ -1,5 +1,4 @@
 #include "PlayerAudio.h"
-ؤ
 
 PlayerAudio::PlayerAudio() { formatManager.registerBasicFormats(); }
 PlayerAudio::~PlayerAudio() { releaseResources(); }
@@ -86,4 +85,5 @@ void PlayerAudio::playFileAt(int index)
     play();
 }
 juce::String PlayerAudio::getFileNameAt(int index) const { return (index >= 0 && index < (int)playlist.size()) ? playlist[index].getFileName() : ""; }
+
 
