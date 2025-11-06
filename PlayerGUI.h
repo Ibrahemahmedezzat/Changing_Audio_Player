@@ -4,7 +4,8 @@
 
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
-    public juce::Slider::Listener
+    public juce::Slider::Listener,
+    public juce::Timer
 {
 public:
     PlayerGUI();
@@ -32,6 +33,9 @@ private:
     juce::TextButton endButton{ ">|" };
     juce::TextButton muteButton{ "Mute" };
     juce::Slider volumeSlider;
+    juce::Slider speedSlider;
+    juce::Slider progressSlider;
+    bool userIsDragging = false;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     double currentSampleRate = 0.0;
@@ -40,6 +44,10 @@ private:
 
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
+    void sliderDragStarted(juce::Slider* slider) override;
+    void sliderDragEnded(juce::Slider* slider) override;
+    void timerCallback() override;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };

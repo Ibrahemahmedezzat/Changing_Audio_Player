@@ -8,11 +8,23 @@ PlayerGUI::PlayerGUI()
         btn->addListener(this);
         addAndMakeVisible(*btn);
     }
+    addAndMakeVisible(speedSlider);
+    speedSlider.setRange(0.5, 2.0, 0.01);
+    speedSlider.setValue(1.0);
+    speedSlider.setTextValueSuffix("x");
+    speedSlider.addListener(this);
 
     volumeSlider.setRange(0.0, 1.0, 0.01);
     volumeSlider.setValue(0.5);
     volumeSlider.addListener(this);
     addAndMakeVisible(volumeSlider);
+
+    addAndMakeVisible(progressSlider);
+    progressSlider.setRange(0.0, 1.0);
+    progressSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+    progressSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    progressSlider.addListener(this);
+    startTimerHz(30);
 }
 
 PlayerGUI::~PlayerGUI() {}
@@ -37,7 +49,11 @@ void PlayerGUI::resized()
         x += buttonWidth + spacing;
     }
 
-    volumeSlider.setBounds(20, y + buttonHeight + 20, getWidth() - 40, 30);
+    volumeSlider.setBounds(20, 80, 200, 30);
+    speedSlider.setBounds(20, 120, 200, 30);                   // مكانه في الواجهة
+
+    progressSlider.setBounds(20, 150, 400, 20);
+
 }
 
 void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -126,4 +142,52 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider && !isMuted)
         playerAudio.setGain((float)slider->getValue());
+
+    if (slider == &speedSlider)
+        playerAudio.setSpeed(speedSlider.getValue());
+
+    
+        if (slider == &progressSlider && userIsDragging)
+        {
+            double len = playerAudio.getTotalLength();
+            double pos = progressSlider.getValue() * len;
+            playerAudio.setPosition(pos);
+        }
+    
+
 }
+
+void PlayerGUI::sliderDragStarted(juce::Slider* slider)
+{
+    if (slider == &progressSlider)
+        userIsDragging = true;
+}
+
+void PlayerGUI::sliderDragEnded(juce::Slider* slider)
+{
+    if (slider == &progressSlider)
+    {
+        userIsDragging = false;
+        double len = playerAudio.getTotalLength();
+        double pos = progressSlider.getValue() * len;
+        playerAudio.setPosition(pos);
+    }
+}
+
+void PlayerGUI::timerCallback()
+{
+    if (!userIsDragging)
+    {
+        double len = playerAudio.getTotalLength();
+        if (len > 0)
+        {
+            double pos = playerAudio.getCurrentPosition();
+            progressSlider.setValue(pos / len, juce::dontSendNotification);
+        }
+        else
+        {
+            progressSlider.setValue(0.0, juce::dontSendNotification);
+        }
+    }
+}
+
