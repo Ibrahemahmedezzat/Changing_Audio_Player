@@ -14,42 +14,51 @@ public:
     MainComponent();
     ~MainComponent() override;
 
+    // Audio callbacks
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
+    // GUI rendering and layout
     void paint(juce::Graphics& g) override;
     void resized() override;
 
+
+    // UI event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
     void comboBoxChanged(juce::ComboBox* comboBox) override;
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
 private:
+
+    // Helper functions
     void loadCurrentTrack();
     void nextTrack();
     void prevTrack();
 
-    // --- Player ---
+
+    // Audio player
     PlayerAudio playerAudio;
 
-    // --- Buttons ---
-    juce::TextButton loadButton{"Load"};
-    juce::TextButton restartButton{"Restart"};
-    juce::TextButton playPauseButton{"Play"};
-    juce::TextButton stopButton{"Stop"};
-    juce::TextButton nextButton{"Next"};
-    juce::TextButton prevButton{"Prev"};
-    juce::TextButton muteButton{"Mute"};
-    juce::TextButton loopButton{"Loop Off"};
-    juce::TextButton goToStartButton{"|<"};
-    juce::TextButton goToEndButton{">|"};
+    // UI components
 
-    // --- Slider ---
+    // --- Buttons ---
+    juce::TextButton loadButton      { "Load" };
+    juce::TextButton restartButton   { "Restart" };
+    juce::TextButton playPauseButton { "Play" };
+    juce::TextButton stopButton      { "Stop" };
+    juce::TextButton nextButton      { "Next" };
+    juce::TextButton prevButton      { "Prev" };
+    juce::TextButton muteButton      { "Mute" };
+    juce::TextButton loopButton      { "Loop Off" };
+    juce::TextButton goToStartButton { "|<" };
+    juce::TextButton goToEndButton   { ">|" };
+
+    // --- Volume slider ---
     juce::Slider volumeSlider;
 
-    // --- Labels for metadata ---
+    // --- Metadata labels ---
     juce::Label titleLabel;
     juce::Label artistLabel;
     juce::Label albumLabel;
@@ -60,6 +69,7 @@ private:
     std::vector<juce::File> playlist;
     int currentTrackIndex = 0;
 
+    // --- State and helpers ---
     std::unique_ptr<juce::FileChooser> fileChooser;
     bool isPlaying = false;
     bool isMuted = false;
