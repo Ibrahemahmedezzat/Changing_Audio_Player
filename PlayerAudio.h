@@ -1,6 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include <vector>
+#include <memory>
 
 class PlayerAudio
 {
@@ -8,28 +9,35 @@ public:
     PlayerAudio();
     ~PlayerAudio();
 
+    // --- JUCE audio callbacks ---
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
 
+    // --- File control ---
     bool loadFile(const juce::File& file);
     void play();
     void pause();
     void stop();
-
     void restart();
     bool toggleLoop(); 
 
-    void goToStart();
-    void goToEnd();
+    void start();            
+    void setPosition(double pos);  
+    double getPosition() const;    
+    double getLength() const;      
+    bool isPlaying() const;        
     void setGain(float gain);
+
+    void goToStart();        
+    void goToEnd();          
     void jumpForward(double seconds);
     void jumpBackward(double seconds);
 
     void setLooping(bool shouldLoop) { isLooping = shouldLoop; }
     bool isLoopingEnabled() const { return isLooping; }
 
-    // Playlist support
+    // --- Playlist support ---
     void loadPlaylist(const std::vector<juce::File>& files);
     void playFileAt(int index);
     int getNumFiles() const { return playlist.size(); }
