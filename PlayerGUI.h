@@ -3,51 +3,41 @@
 #include "PlayerAudio.h"
 
 class PlayerGUI : public juce::Component,
-    public juce::Button::Listener,
-    public juce::Slider::Listener,
-    public juce::ListBoxModel
+                  public juce::Button::Listener,
+                  public juce::Slider::Listener
 {
 public:
     PlayerGUI();
     ~PlayerGUI() override;
 
-    void paint(juce::Graphics& g) override;
     void resized() override;
-
+    void paint(juce::Graphics& g) override;
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
 
-    void buttonClicked(juce::Button* button) override;
-    void sliderValueChanged(juce::Slider* slider) override;
-
-    // ListBoxModel overrides
-    int getNumRows() override { return (int)playlistItems.size(); }
-    void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
-    void selectedRowsChanged(int lastRowSelected) override;
-
 private:
     PlayerAudio playerAudio;
 
-    // Buttons
-    juce::TextButton loadButton{ "Load" }, playButton{ "Play" }, pauseButton{ "Pause" }, stopButton{ "Stop" };
-    juce::TextButton restartButton{ "Restart" }, forwardButton{ ">> +10s" }, backwardButton{ "<< -10s" }, loopButton{ "Loop Off" };
-    juce::TextButton startButton{ "|<" }, endButton{ ">|" }, muteButton{ "Mute" };
-
+    juce::TextButton loadButton{ "Load" };
+    juce::TextButton restartButton{ "Restart" };
+    juce::TextButton playPauseButton{ "Play" };
+    juce::TextButton stopButton{ "Stop" };
     juce::Slider volumeSlider;
 
-    // Playlist
-    juce::ListBox playlistBox;
-    juce::StringArray playlistItems;
-    int currentTrackIndex = -1;
-
-    // Metadata display (title, artist, duration)
-    juce::Label metadataLabel;
+    // --- Metadata labels ---
+    juce::Label titleLabel;
+    juce::Label artistLabel;
+    juce::Label albumLabel;
+    juce::Label durationLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
-    double currentSampleRate = 0.0;
-    bool isMuted = false;
-    float previousVolume = 1.0f;
+    bool isPlaying = false;
 
-    void updateMetadataDisplay();
+    void buttonClicked(juce::Button* button) override;
+    void sliderValueChanged(juce::Slider* slider) override;
+
+    void loadFile(const juce::File& file); // وظيفة لعرض البيانات وتحميل الملف
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
