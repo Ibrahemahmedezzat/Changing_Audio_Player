@@ -1,0 +1,13 @@
+# ninja log v6
+26	422	7842446614845179	C:/Users/Hesham/Changing_Audio_Player/cmake-build-debug/JUCE_build/tools/CMakeFiles/cmake.verify_globs	5916c0301cb60925
+484	837	7842446619419080	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_core/juce_core_CompilationTime.cpp.obj	5546249ebe96f34b
+459	2531	7842446619174120	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_graphics/juce_graphics_Sheenbidi.c.obj	cd7d6618e2471259
+493	9347	7842446619511001	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_data_structures/juce_data_structures.cpp.obj	78a59a75f38f9be5
+467	11664	7842446619255345	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_events/juce_events.cpp.obj	d2387c5dde93056d
+424	13225	7842446618822338	extras/Build/juceaide/CMakeFiles/juceaide.dir/Main.cpp.obj	6d1f97d38ee8586d
+429	13672	7842446618873848	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/juce_build_tools/juce_build_tools.cpp.obj	368b38e316865e8d
+476	25889	7842446619336135	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_core/juce_core.cpp.obj	a6777b07e6aa0aa0
+443	64136	7842446619015533	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_graphics/juce_graphics.cpp.obj	d0b32249b112027d
+451	71227	7842446619086726	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_graphics/juce_graphics_Harfbuzz.cpp.obj	c7ff6136518f2864
+436	79377	7842446618934586	extras/Build/juceaide/CMakeFiles/juceaide.dir/__/__/__/modules/juce_gui_basics/juce_gui_basics.cpp.obj	784f61812d062b5e
+79379	80134	7842447408376735	extras/Build/juceaide/juceaide_artefacts/Custom/juceaide.exe	181bc0b922906280

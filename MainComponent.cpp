@@ -2,6 +2,7 @@
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 
+
 MainComponent::MainComponent()
 {
     // --- Buttons ---
@@ -29,15 +30,18 @@ MainComponent::MainComponent()
     playlistBox.addListener(this);
     addAndMakeVisible(playlistBox);
 
-    setSize(800, 800);
+    // --- Window setup ---
+    setSize(1000, 800);
     setAudioChannels(0, 2); // stereo output
 }
 
+//==============================================================================
 MainComponent::~MainComponent()
 {
     shutdownAudio();
 }
 
+//==============================================================================
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     playerAudio.prepareToPlay(samplesPerBlockExpected, sampleRate);
@@ -56,12 +60,16 @@ void MainComponent::releaseResources()
 void MainComponent::paint(juce::Graphics& g)
 {
     g.fillAll(juce::Colours::darkgrey);
+
+    g.setColour(juce::Colours::white);
+    g.setFont(18.0f);
+    g.drawFittedText("Simple Audio Player", getLocalBounds(), juce::Justification::centredTop, 1);
 }
 
 void MainComponent::resized()
 {
     int x = 20;
-    int y = 20;
+    int y = 50;
     int width = 90;
     int height = 40;
     int gap = 10;
@@ -187,8 +195,8 @@ void MainComponent::buttonClicked(juce::Button* button)
             playerAudio.start();
         }
     }
-
 }
+
 
 void MainComponent::sliderValueChanged(juce::Slider* slider)
 {
@@ -213,7 +221,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* /*source*/)
 {
     if (isLooping && !playerAudio.isPlaying())
     {
-        // الأغنية خلصت طبيعي
         if (playerAudio.getPosition() >= playerAudio.getLength() - 0.05)
         {
             playerAudio.setPosition(0.0);
