@@ -1,78 +1,35 @@
 #include "PlayerGUI.h"
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
 
 PlayerGUI::PlayerGUI()
 {
-    // Buttons
-    addAndMakeVisible(loadButton);
-    addAndMakeVisible(playButton);
-    addAndMakeVisible(pauseButton);
-    addAndMakeVisible(stopButton);
-    addAndMakeVisible(restartButton);
-    addAndMakeVisible(forwardButton);
-    addAndMakeVisible(backwardButton);
-    addAndMakeVisible(loopButton);
-    addAndMakeVisible(startButton);
-    addAndMakeVisible(endButton);
-    addAndMakeVisible(muteButton);
+    for (auto* btn : { &loadButton, &restartButton, &playPauseButton, &stopButton })
+    {
+        btn->addListener(this);
+        addAndMakeVisible(btn);
+    }
 
-    loadButton.addListener(this);
-    playButton.addListener(this);
-    pauseButton.addListener(this);
-    stopButton.addListener(this);
-    restartButton.addListener(this);
-    forwardButton.addListener(this);
-    backwardButton.addListener(this);
-    loopButton.addListener(this);
-    startButton.addListener(this);
-    endButton.addListener(this);
-    muteButton.addListener(this);
-
-    // Volume slider
-    addAndMakeVisible(volumeSlider);
-    volumeSlider.setRange(0.0, 1.0);
-    volumeSlider.setValue(1.0);
+    volumeSlider.setRange(0.0, 1.0, 0.01);
+    volumeSlider.setValue(0.5);
     volumeSlider.addListener(this);
+    addAndMakeVisible(volumeSlider);
 
-    // Playlist
-    addAndMakeVisible(playlistBox);
-    playlistBox.setModel(this);
+    // Labels for metadata
+    addAndMakeVisible(titleLabel);
+    addAndMakeVisible(artistLabel);
+    addAndMakeVisible(albumLabel);
+    addAndMakeVisible(durationLabel);
 
-    // Metadata label
-    addAndMakeVisible(metadataLabel);
-    metadataLabel.setText("No track loaded", juce::dontSendNotification);
-    metadataLabel.setJustificationType(juce::Justification::centredLeft);
+    setSize(500, 250);
 }
 
-PlayerGUI::~PlayerGUI() {}
-
-void PlayerGUI::paint(juce::Graphics& g)
+PlayerGUI::~PlayerGUI()
 {
-    g.fillAll(juce::Colours::darkgrey);
-}
+    for (auto* btn : { &loadButton, &restartButton, &playPauseButton, &stopButton })
+        btn->removeListener(this);
 
-void PlayerGUI::resized()
-{
-    auto area = getLocalBounds().reduced(10);
-
-    auto topArea = area.removeFromTop(30);
-    loadButton.setBounds(topArea.removeFromLeft(60));
-    playButton.setBounds(topArea.removeFromLeft(60));
-    pauseButton.setBounds(topArea.removeFromLeft(60));
-    stopButton.setBounds(topArea.removeFromLeft(60));
-
-    auto buttonArea = area.removeFromTop(30);
-    startButton.setBounds(buttonArea.removeFromLeft(50));
-    backwardButton.setBounds(buttonArea.removeFromLeft(70));
-    restartButton.setBounds(buttonArea.removeFromLeft(70));
-    forwardButton.setBounds(buttonArea.removeFromLeft(70));
-    endButton.setBounds(buttonArea.removeFromLeft(50));
-    loopButton.setBounds(buttonArea.removeFromLeft(70));
-
-    volumeSlider.setBounds(area.removeFromTop(30).reduced(10, 0)); 
-    muteButton.setBounds(area.removeFromTop(30).removeFromLeft(60)); 
-
-    playlistBox.setBounds(area.removeFromTop(150));
-    metadataLabel.setBounds(area.removeFromTop(30));
+    volumeSlider.removeListener(this);
 }
 
 void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -90,94 +47,103 @@ void PlayerGUI::releaseResources()
     playerAudio.releaseResources();
 }
 
+void PlayerGUI::paint(juce::Graphics& g)
+{
+    g.fillAll(juce::Colours::skyblue);
+}
+
+void PlayerGUI::resized()
+{
+    int y = 20;
+    int buttonWidth = 90;
+    int buttonHeight = 40;
+    int gap = 10;
+
+    loadButton.setBounds(20, y, buttonWidth, buttonHeight);
+    restartButton.setBounds(loadButton.getRight() + gap, y, buttonWidth, buttonHeight);
+    playPauseButton.setBounds(restartButton.getRight() + gap, y, buttonWidth, buttonHeight);
+    stopButton.setBounds(playPauseButton.getRight() + gap, y, buttonWidth, buttonHeight);
+    volumeSlider.setBounds(20, 80, getWidth() - 40, 30);
+
+    // Metadata labels
+    titleLabel.setBounds(20, 120, getWidth() - 40, 20);
+    artistLabel.setBounds(20, 140, getWidth() - 40, 20);
+    albumLabel.setBounds(20, 160, getWidth() - 40, 20);
+    durationLabel.setBounds(20, 180, getWidth() - 40, 20);
+}
+
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
     if (button == &loadButton)
     {
-        fileChooser = std::make_unique<juce::FileChooser>("Select audio files", juce::File{}, "*.wav;*.mp3;*.flac");
-        fileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectMultiple,
-            [this](const juce::FileChooser& chooser)
+        fileChooser = std::make_unique<juce::FileChooser>(
+            "Select an audio file...",
+            juce::File{},
+            "*.wav;*.mp3;*.aiff;*.ogg;*.flac");
+
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+            [this](const juce::FileChooser& fc)
             {
-                juce::Array<juce::File> selectedFiles;
-                chooser.getResults(selectedFiles);
-
-                if (!selectedFiles.isEmpty())
+                auto file = fc.getResult();
+                if (file.existsAsFile())
                 {
-                    playlistItems.clear();
-                    for (auto& f : selectedFiles)
-                        playlistItems.add(f.getFileName());
+                    playerAudio.loadFile(file);
+                    playPauseButton.setButtonText("Play");
+                    isPlaying = false;
 
-                    std::vector<juce::File> filesVec;
-                    for (auto& f : selectedFiles)
-                        filesVec.push_back(f);
-
-                    playerAudio.loadPlaylist(filesVec);
-                    currentTrackIndex = 0;
-                    playlistBox.updateContent();
-                    playlistBox.selectRow(currentTrackIndex);
-                    updateMetadataDisplay();
+                    // --- Use TagLib to get metadata ---
+                    TagLib::FileRef f(file.getFullPathName().toStdString().c_str());
+                    if (!f.isNull() && f.tag())
+                    {
+                        auto* tag = f.tag();
+                        titleLabel.setText(tag->title().to8Bit(true), juce::dontSendNotification);
+                        artistLabel.setText(tag->artist().to8Bit(true), juce::dontSendNotification);
+                        albumLabel.setText(tag->album().to8Bit(true), juce::dontSendNotification);
+                        durationLabel.setText(juce::String(playerAudio.getLength(), 2) + " s", juce::dontSendNotification);
+                    }
+                    else
+                    {
+                        titleLabel.setText(file.getFileName(), juce::dontSendNotification);
+                        artistLabel.setText("Unknown", juce::dontSendNotification);
+                        albumLabel.setText("Unknown", juce::dontSendNotification);
+                        durationLabel.setText(juce::String(playerAudio.getLength(), 2) + " s", juce::dontSendNotification);
+                    }
                 }
             });
     }
-    else if (button == &playButton) playerAudio.start();
-    else if (button == &pauseButton) playerAudio.pause();
-    else if (button == &stopButton) playerAudio.stop();
-    else if (button == &restartButton) playerAudio.restart();
-    else if (button == &forwardButton) playerAudio.skip(10.0);
-    else if (button == &backwardButton) playerAudio.skip(-10.0);
-    else if (button == &startButton) playerAudio.jumpToStart(); 
-    else if (button == &endButton) playerAudio.jumpToEnd();    
-    else if (button == &loopButton)
+    else if (button == &restartButton)
     {
-        bool newLoopState = playerAudio.toggleLoop();
-        loopButton.setButtonText(newLoopState ? "Loop On" : "Loop Off");
+        playerAudio.setPosition(0.0);
+        playerAudio.start();
+        playPauseButton.setButtonText("Pause");
+        isPlaying = true;
     }
-    else if (button == &muteButton)
+    else if (button == &playPauseButton)
     {
-        isMuted = !isMuted;
-        playerAudio.setGain(isMuted ? 0.0f : previousVolume);
-        muteButton.setButtonText(isMuted ? "Unmute" : "Mute");
+        if (!isPlaying)
+        {
+            playerAudio.start();
+            playPauseButton.setButtonText("Pause");
+        }
+        else
+        {
+            playerAudio.stop();
+            playPauseButton.setButtonText("Play");
+        }
+        isPlaying = !isPlaying;
+    }
+    else if (button == &stopButton)
+    {
+        playerAudio.stop();
+        playerAudio.setPosition(0.0);
+        playPauseButton.setButtonText("Play");
+        isPlaying = false;
     }
 }
 
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
-    {
-        previousVolume = (float)slider->getValue();
-        if (!isMuted) playerAudio.setGain(previousVolume);
-    }
-}
-
-// ListBoxModel overrides
-void PlayerGUI::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected)
-{
-    if (rowNumber < 0 || rowNumber >= playlistItems.size()) return;
-
-    if (rowIsSelected) g.fillAll(juce::Colours::lightblue);
-    g.setColour(juce::Colours::white);
-    g.drawText(playlistItems[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft);
-}
-
-void PlayerGUI::selectedRowsChanged(int lastRowSelected)
-{
-    if (lastRowSelected >= 0 && lastRowSelected < playlistItems.size())
-    {
-        currentTrackIndex = lastRowSelected;
-        playerAudio.playTrack(currentTrackIndex);
-        updateMetadataDisplay();
-    }
-}
-
-void PlayerGUI::updateMetadataDisplay()
-{
-    if (currentTrackIndex >= 0 && currentTrackIndex < playlistItems.size())
-    {
-        juce::String displayText = playlistItems[currentTrackIndex];
-        metadataLabel.setText(displayText, juce::dontSendNotification);
-    }
-    else
-    {
-        metadataLabel.setText("No track selected", juce::dontSendNotification);
-    }
+        playerAudio.setGain((float)slider->getValue());
 }
