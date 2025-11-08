@@ -8,7 +8,7 @@
 struct TrackMarker
 {
     juce::String name;    
-    double position;     
+    double position;      
 };
 
 class MainComponent : public juce::AudioAppComponent,
@@ -16,7 +16,7 @@ class MainComponent : public juce::AudioAppComponent,
                       public juce::Slider::Listener,
                       public juce::ComboBox::Listener,
                       public juce::ChangeListener,
-                      public juce::ListBoxModel
+                      public juce::ListBoxModel 
 {
 public:
     MainComponent();
